@@ -41,7 +41,7 @@ namespace Booble_IA_API._3___Repository
             }
         }
 
-        public async Task<bool> Login(UsuarioDTO loginRequest)
+        public async Task<Usuario> Login(UsuarioDTO loginRequest)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace Booble_IA_API._3___Repository
                 if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Senha, usuario.Senha))
                     throw new Exception("Email e senha não coincidem, verifique as credenciais e tente novamente");
 
-                return true;
+                return usuario;
             }
             catch(Exception ex)
             {

@@ -1,0 +1,13 @@
+﻿using Booble_IA_API._3___Repository.Entities;
+using System.Net;
+
+namespace Booble_IA_API._3___Repository.Interfaces
+{
+    public interface IAmizadeRepository
+    {
+        Task<List<Amizade>> ObterAmizadePorIdUsuario(int idfUsuario);
+        Task<bool> AceitarAmizade(int idfAmizade);
+        Task<bool> RecusarAmizade(int idfAmizade);
+        Task<bool> DesfazerAmizade(int idfAmizade);       
+    }
+}

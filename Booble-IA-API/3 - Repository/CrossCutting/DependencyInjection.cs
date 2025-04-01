@@ -2,6 +2,7 @@
 using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API._2___Services.Models;
 using Booble_IA_API._3___Repository.Data;
+using Booble_IA_API._3___Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -19,6 +20,9 @@ namespace Booble_IA_API._3___Repository.CrossCutting
 
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+
+            services.AddScoped<IAmizadeRepository, AmizadeRepository>();
 
             return services;
         }

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API._3___Repository;
+using Booble_IA_API._3___Repository.Entities;
 using Booble_IA_API.DTO;
 using Newtonsoft.Json.Linq;
 
@@ -62,7 +63,7 @@ namespace Booble_IA_API._2___Services
         #endregion
 
         #region Login
-        public async Task<bool> Login(UsuarioDTO loginRequest)
+        public async Task<string> Login(UsuarioDTO loginRequest)
         {
             try
             {
@@ -71,15 +72,18 @@ namespace Booble_IA_API._2___Services
 
                 if (string.IsNullOrEmpty(loginRequest.Senha))
                     throw new ArgumentNullException(nameof(loginRequest.Senha), "O campo Email não pode estar vázio.");
-                
-                if(await _usuarioRepository.Login(loginRequest))
+
+                Usuario usuario = await _usuarioRepository.Login(loginRequest);
+                UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+                if (usuario != null)
                 {
-                    string token = _jwtTokenService.GenerateToken(cadastroRequest);
+                    return _jwtTokenService.GenerateToken(usuarioDTO);
                 }
+                throw new Exception("Não foi possível realizar o login");
             }
             catch (Exception ex)
             {
-
+                throw new Exception($"Erro no servidor:{ex}");
             }
         }
         #endregion
