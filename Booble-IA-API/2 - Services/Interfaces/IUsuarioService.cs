@@ -1,12 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-using Booble_IA_API._3___Repository.Entities;
+﻿using Booble_IA_API._3___Repository.Entities;
 using Booble_IA_API.DTO;
+using System.Threading.Tasks;
 
 namespace Booble_IA_API._2___Services.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<bool> Cadastro(UsuarioDTO cadastroRequest);
-        Task<Usuario> Login(UsuarioDTO loginRequest);
+        Task<object> Cadastro(UsuarioDTO cadastroRequest);
+        Task<string> Login(UsuarioDTO loginRequest);
     }
 }

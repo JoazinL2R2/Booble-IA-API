@@ -17,33 +17,60 @@ namespace Booble_IA_API._2___Services
         #region Metodos
 
         #region AceitarAmizade
-        public Task<bool> AceitarAmizade(int idfAmizade)
+        public async Task<bool> AceitarAmizade(int idfAmizade)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _AmizadeRepository.AceitarAmizade(idfAmizade);
+            }
+            catch
+            {
+                return false;
+            }
         }
         #endregion
 
         #region DesfazerAmizade
-        public Task<bool> DesfazerAmizade(int idfAmizade)
+        public async Task<bool> DesfazerAmizade(int idfAmizade)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _AmizadeRepository.DesfazerAmizade(idfAmizade);
+            }
+            catch
+            {
+                return false;
+            }
         }
         #endregion
 
         #region ObterAmizadePorIdUsuario
-        public Task<List<Amizade>> ObterAmizadePorIdUsuario(int idfUsuario)
+        public async Task<List<Amizade>> ObterAmizadePorIdUsuario(int idfUsuario)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _AmizadeRepository.ObterAmizadePorIdUsuario(idfUsuario);
+            }
+            catch
+            {
+                return new List<Amizade>();
+            }
         }
         #endregion
 
         #region RecusarAmizade
-        public Task<bool> RecusarAmizade(int idfAmizade)
+        public async Task<bool> RecusarAmizade(int idfAmizade)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _AmizadeRepository.RecusarAmizade(idfAmizade);
+            }
+            catch
+            {
+                return false;
+            }
         }
         #endregion
-
 
         #endregion
     }

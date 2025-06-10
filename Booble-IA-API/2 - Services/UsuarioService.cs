@@ -1,93 +1,80 @@
-﻿using System.Runtime.CompilerServices;
-using Booble_IA_API._2___Services.Interfaces;
-using Booble_IA_API._3___Repository;
+﻿using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API._3___Repository.Entities;
+using Booble_IA_API._3___Repository.Interfaces;
 using Booble_IA_API.DTO;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace Booble_IA_API._2___Services
 {
     public class UsuarioService : IUsuarioService
     {
-        #region Construtores
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IJwtTokenService _jwtTokenService;
+
         public UsuarioService(IUsuarioRepository usuarioRepository, IJwtTokenService tokenService)
         {
             _usuarioRepository = usuarioRepository;
             _jwtTokenService = tokenService;
         }
-        #endregion
 
-        #region Metodos
-
-        #region Cadastro
         public async Task<object> Cadastro(UsuarioDTO cadastroRequest)
         {
-            if (cadastroRequest != null)
+            if (cadastroRequest == null)
+                throw new ArgumentNullException(nameof(cadastroRequest), "Null request");
+
+            if (string.IsNullOrEmpty(cadastroRequest.Des_Email))
+                throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "O campo Email não pode ser nulo.");
+
+            if (string.IsNullOrEmpty(cadastroRequest.Des_Nme))
+                throw new ArgumentNullException(nameof(cadastroRequest.Des_Nme), "O campo Nome não pode ser nulo.");
+
+            if (!cadastroRequest.Flg_Sexo.HasValue)
+                throw new ArgumentNullException(nameof(cadastroRequest.Flg_Sexo), "O campo Sexo não pode ser nulo.");
+
+            if (cadastroRequest.Dta_Nascimento == default)
+                throw new ArgumentNullException(nameof(cadastroRequest.Dta_Nascimento), "O campo Data de nascimento não pode ser nulo.");
+
+            if (string.IsNullOrEmpty(cadastroRequest.Senha))
+                throw new ArgumentNullException(nameof(cadastroRequest.Senha), "O campo Senha não pode ser nula.");
+
+            if (string.IsNullOrEmpty(cadastroRequest.Num_Telefone))
+                throw new ArgumentNullException(nameof(cadastroRequest.Num_Telefone), "O campo Numero de telefone não pode ser nulo.");
+
+            if (await _usuarioRepository.Cadastro(cadastroRequest))
             {
-                if(string.IsNullOrEmpty(cadastroRequest.Des_Email))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "O campo Email não pode ser nulo.");
+                string token = _jwtTokenService.GenerateToken(cadastroRequest);
 
-                if(string.IsNullOrEmpty(cadastroRequest.Des_Nme))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "O campo Nome não pode ser nulo.");
+                if (string.IsNullOrEmpty(token))
+                    throw new Exception("Erro ao gerar token de autenticação.");
 
-                if (string.IsNullOrEmpty(cadastroRequest.Flg_Sexo.ToString()))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "O campo Sexo não pode ser nulo.");
-
-                if (string.IsNullOrEmpty(cadastroRequest.Dta_Nascimento.ToString()))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "O campo Data de nascimento não pode ser nulo.");
-
-                if (string.IsNullOrEmpty(cadastroRequest.Senha))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "A campo Senha não pode ser nula.");
-
-                if (string.IsNullOrEmpty(cadastroRequest.Num_Telefone))
-                    throw new ArgumentNullException(nameof(cadastroRequest.Des_Email), "A campo Numero de telefone não pode ser nulo.");
-
-                if(await _usuarioRepository.Cadastro(cadastroRequest))
+                return new
                 {
-                    string token = _jwtTokenService.GenerateToken(cadastroRequest);
-
-                    if (string.IsNullOrEmpty(token))
-                        throw new Exception("Erro ao gerar token de autenticação.");
-
-                    return new
-                    {
-                        usuario = cadastroRequest,
-                        Authtoken = token
-                    };
-                }
+                    usuario = cadastroRequest,
+                    Authtoken = token
+                };
             }
-            throw new ArgumentNullException(nameof(cadastroRequest),"Null request");
-        }
-        #endregion
 
-        #region Login
+            throw new Exception("Erro ao cadastrar usuário.");
+        }
+
         public async Task<string> Login(UsuarioDTO loginRequest)
         {
-            try
-            {
-                if(string.IsNullOrEmpty(loginRequest.Des_Email))
-                    throw new ArgumentNullException(nameof(loginRequest.Des_Email),"O campo Email não pode estar vázio.");
+            if (string.IsNullOrEmpty(loginRequest.Des_Email))
+                throw new ArgumentNullException(nameof(loginRequest.Des_Email), "O campo Email não pode estar vázio.");
 
-                if (string.IsNullOrEmpty(loginRequest.Senha))
-                    throw new ArgumentNullException(nameof(loginRequest.Senha), "O campo Email não pode estar vázio.");
+            if (string.IsNullOrEmpty(loginRequest.Senha))
+                throw new ArgumentNullException(nameof(loginRequest.Senha), "O campo Senha não pode estar vázio.");
 
-                Usuario usuario = await _usuarioRepository.Login(loginRequest);
-                UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
-                if (usuario != null)
-                {
-                    return _jwtTokenService.GenerateToken(usuarioDTO);
-                }
-                throw new Exception("Não foi possível realizar o login");
-            }
-            catch (Exception ex)
+            Usuario usuario = await _usuarioRepository.Login(loginRequest);
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+
+            if (usuario != null)
             {
-                throw new Exception($"Erro no servidor:{ex}");
+                return _jwtTokenService.GenerateToken(usuarioDTO);
             }
+
+            throw new Exception("Não foi possível realizar o login");
         }
-        #endregion
-
-        #endregion
     }
 }

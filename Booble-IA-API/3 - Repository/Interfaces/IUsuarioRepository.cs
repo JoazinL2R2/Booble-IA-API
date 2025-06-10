@@ -1,8 +1,12 @@
-﻿using Booble_IA_API._2___Services.Interfaces;
+﻿using Booble_IA_API._3___Repository.Entities;
+using Booble_IA_API.DTO;
+using System.Threading.Tasks;
 
-namespace Booble_IA_API._3___Repository
+namespace Booble_IA_API._3___Repository.Interfaces
 {
-    public interface IUsuarioRepository : IUsuarioService
+    public interface IUsuarioRepository
     {
+        Task<bool> Cadastro(UsuarioDTO usuario);
+        Task<Usuario> Login(UsuarioDTO loginRequest);
     }
 }
