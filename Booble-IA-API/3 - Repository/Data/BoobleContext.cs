@@ -11,11 +11,13 @@ namespace Booble_IA_API._3___Repository.Data
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Amizade> Amizades { get; set; }
+        public DbSet<Habito> Habitos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UsuarioMap());
             modelBuilder.ApplyConfiguration(new AmizadeMap());
+            modelBuilder.ApplyConfiguration(new HabitoMap());
         }
     }
 }

@@ -23,12 +23,16 @@ namespace Booble_IA_API.Controllers
         {
             try
             {
-                bool cadastrado = await _usuarioService.Cadastro(cadastroRequest);
+                var cadastrado = await _usuarioService.Cadastro(cadastroRequest);
 
-                if (!cadastrado)
-                    return BadRequest(new { message = "Não foi possível realizar o cadastro do usuário." });              
+                if (cadastrado == null)
+                    return BadRequest(new { message = "Não foi possível realizar o cadastro do usuário." });
 
-                return Ok();
+                return Ok(cadastrado);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -42,13 +46,21 @@ namespace Booble_IA_API.Controllers
         {
             try
             {
-                
-            }
-            catch
-            {
+                var token = await _usuarioService.Login(loginRequest);
 
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest(new { message = "Email ou senha inválidos." });
+
+                return Ok(new { Authtoken = token });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro interno ao realizar login: {ex.Message}" });
             }
         }
-
     }
 }

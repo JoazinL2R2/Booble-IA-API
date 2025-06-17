@@ -16,7 +16,7 @@ namespace Booble_IA_API._1___Controllers
         }
 
         // GET: api/Amizade/usuario/5
-        [HttpGet("usuario/{idfUsuario:int}")]
+        [HttpGet("usuario")]
         public async Task<ActionResult<List<Amizade>>> ObterAmizadePorIdUsuario(int idfUsuario)
         {
             var amizades = await _amizadeService.ObterAmizadePorIdUsuario(idfUsuario);
@@ -26,7 +26,7 @@ namespace Booble_IA_API._1___Controllers
         }
 
         // POST: api/Amizade/aceitar/5
-        [HttpPost("aceitar/{idfAmizade:int}")]
+        [HttpPost("aceitar")]
         public async Task<ActionResult> AceitarAmizade(int idfAmizade)
         {
             var result = await _amizadeService.AceitarAmizade(idfAmizade);
@@ -36,7 +36,7 @@ namespace Booble_IA_API._1___Controllers
         }
 
         // POST: api/Amizade/recusar/5
-        [HttpPost("recusar/{idfAmizade:int}")]
+        [HttpPost("recusar")]
         public async Task<ActionResult> RecusarAmizade(int idfAmizade)
         {
             var result = await _amizadeService.RecusarAmizade(idfAmizade);
@@ -46,7 +46,7 @@ namespace Booble_IA_API._1___Controllers
         }
 
         // POST: api/Amizade/desfazer/5
-        [HttpPost("desfazer/{idfAmizade:int}")]
+        [HttpPost("desfazer")]
         public async Task<ActionResult> DesfazerAmizade(int idfAmizade)
         {
             var result = await _amizadeService.DesfazerAmizade(idfAmizade);
