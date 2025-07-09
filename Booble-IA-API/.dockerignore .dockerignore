@@ -1,0 +1,48 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+.vscode/
+
+# User-specific files
+*.user
+*.suo
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+**/Dockerfile*
+**/docker-compose*
+.dockerignore
+
+# Documentation
+README.md
+LICENSE
+
+# Test files
+**/*test*/
+**/*Test*/
+
+# IDE files
+.idea/
+*.swp
+*.swo
