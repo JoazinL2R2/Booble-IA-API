@@ -30,7 +30,7 @@ namespace Booble_IA_API._2___Services
                 throw new ArgumentNullException(nameof(cadastroRequest.Des_Nme), "O campo Nome não pode ser nulo.");
 
             if (!cadastroRequest.Flg_Sexo.HasValue)
-                throw new ArgumentNullException(nameof(cadastroRequest.Flg_Sexo), "O campo Sexo não pode ser nulo.");
+                cadastroRequest.Flg_Sexo = false; //TODO: incluir flag preencher depois
 
             if (cadastroRequest.Dta_Nascimento == default)
                 throw new ArgumentNullException(nameof(cadastroRequest.Dta_Nascimento), "O campo Data de nascimento não pode ser nulo.");
@@ -39,7 +39,7 @@ namespace Booble_IA_API._2___Services
                 throw new ArgumentNullException(nameof(cadastroRequest.Senha), "O campo Senha não pode ser nula.");
 
             if (string.IsNullOrEmpty(cadastroRequest.Num_Telefone))
-                throw new ArgumentNullException(nameof(cadastroRequest.Num_Telefone), "O campo Numero de telefone não pode ser nulo.");
+                cadastroRequest.Num_Telefone = "123123123"; //TODO: incluir flag preencher depois
 
             if (await _usuarioRepository.Cadastro(cadastroRequest))
             {
@@ -67,7 +67,17 @@ namespace Booble_IA_API._2___Services
                 throw new ArgumentNullException(nameof(loginRequest.Senha), "O campo Senha não pode estar vázio.");
 
             Usuario usuario = await _usuarioRepository.Login(loginRequest);
-            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+            UsuarioDTO usuarioDTO = new UsuarioDTO
+            {
+                Idf_Usuario = usuario.Idf_Usuario,
+                Des_Email = usuario.Des_Email,
+                Des_Nme = usuario.Des_Nme,
+                Num_Telefone = usuario.Num_Telefone,
+                Flg_Sexo = usuario.Flg_Sexo,
+                Dta_Nascimento = usuario.Dta_Nascimento,
+                Dta_Cadastro = usuario.Dta_Cadastro,
+                Dta_Alteracao = usuario.Dta_Alteracao
+            };
 
             if (usuario != null)
             {

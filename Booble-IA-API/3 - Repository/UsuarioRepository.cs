@@ -30,8 +30,8 @@ namespace Booble_IA_API._3___Repository
                     Dta_Nascimento = usuario.Dta_Nascimento,
                     Flg_Sexo = usuario.Flg_Sexo ?? false,
                     Num_Telefone = usuario.Num_Telefone,
-                    Dta_Alteracao = DateTime.Now,
-                    Dta_Cadastro = DateTime.Now,
+                    Dta_Alteracao = DateTime.UtcNow,
+                    Dta_Cadastro = DateTime.UtcNow,
                 };
 
                 await _boobleContext.Usuarios.AddAsync(usuarioInsert);
