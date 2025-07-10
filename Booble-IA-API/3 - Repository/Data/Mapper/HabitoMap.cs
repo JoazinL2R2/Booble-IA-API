@@ -1,6 +1,8 @@
 ﻿using Booble_IA_API._3___Repository.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Text.Json;
 
 namespace Booble_IA_API._3___Repository.Data.Mapper
 {
@@ -62,9 +64,17 @@ namespace Booble_IA_API._3___Repository.Data.Mapper
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .IsRequired();
 
-            builder.Property<string>("Dta_Conclusoes")
+            // Configure List<DateTime> as JSON in PostgreSQL with value comparer
+            builder.Property(h => h.Dta_Conclusoes)
                 .HasColumnName("Dta_Conclusoes")
-                .HasMaxLength(2000);
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => v == null ? null : JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => v == null ? null : JsonSerializer.Deserialize<List<DateTime>>(v, (JsonSerializerOptions?)null))
+                .Metadata.SetValueComparer(new ValueComparer<List<DateTime>?>(
+                    (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c == null ? null : c.ToList()));
         }
     }
 }

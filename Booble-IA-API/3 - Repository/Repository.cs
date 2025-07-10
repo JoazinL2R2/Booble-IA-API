@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Booble_IA_API._3___Repository
 {
-    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+    public class Repository<TEntity> where TEntity : class
     {
         protected readonly BoobleContext _context;
         private readonly DbSet<TEntity> _dbSet;
