@@ -20,7 +20,7 @@ namespace Booble_IA_API._3___Repository.CrossCutting
 
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             services.AddScoped<IAmizadeRepository, AmizadeRepository>();
 
