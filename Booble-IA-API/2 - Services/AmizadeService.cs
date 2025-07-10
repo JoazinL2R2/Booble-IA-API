@@ -1,14 +1,15 @@
 ﻿using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API._3___Repository;
 using Booble_IA_API._3___Repository.Entities;
+using Booble_IA_API._3___Repository.Interfaces;
 
 namespace Booble_IA_API._2___Services
 {
     public class AmizadeService : IAmizadeService
     {
         #region Construtores
-        private readonly AmizadeRepository _AmizadeRepository;
-        public AmizadeService(AmizadeRepository amizadeRepository)
+        private readonly IAmizadeRepository _AmizadeRepository;
+        public AmizadeService(IAmizadeRepository amizadeRepository)
         {
             _AmizadeRepository = amizadeRepository;
         }

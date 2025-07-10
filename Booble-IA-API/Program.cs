@@ -13,27 +13,14 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-builder.Services.AddDbContext<BoobleContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
-
 // Configuração do JWT, se necessário
 // builder.Services.AddAuthentication(...);
-
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IHabitoService, HabitoService>();
-builder.Services.AddScoped<IHabitoRepository, HabitoRepository>();
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-builder.Services.AddScoped<IAmizadeService, AmizadeService>();
-builder.Services.AddScoped<IAmizadeRepository, AmizadeRepository>();
 
 var app = builder.Build();
 
