@@ -1,0 +1,39 @@
+services:
+  booble-ia-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: booble-ia-api
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__SQLiteConnection=Data Source=database.db
+      - ConnectionStrings__Supabase=User Id=postgres.ohcxkhsgtefvegqteote;Password=b8t5hSDQC01cyKxF;Server=aws-0-sa-east-1.pooler.supabase.com;Port=6543;Database=postgres
+      - JwtSettings__SecretKey=e404e2ac8418e714dc0180caf9da31367bf63d5a4377603ccd91aaa1a361fbcd
+      - JwtSettings__Issuer=booble-ia-api
+      - JwtSettings__Audience=booble-ia-ui
+    volumes:
+      - ~/.aspnet/https:/https:ro
+      - booble-data:/app/data
+    networks:
+      - booble-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  booble-network:
+    driver: bridge
+
+volumes:
+  booble-data:
+  https:
