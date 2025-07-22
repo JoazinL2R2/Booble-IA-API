@@ -5,6 +5,7 @@ namespace Booble_IA_API._3___Repository.Entities
     public class Habito
     {
         public int Idf_Habito { get; set; }
+        public int Idf_Usuario { get; set; }
         public string Des_Habito { get; set; }
         public string Des_Titulo { get; set; }
         public bool? Flg_Timer { get; set; }
@@ -17,6 +18,7 @@ namespace Booble_IA_API._3___Repository.Entities
         public FrequenciaEnum Idf_Frequencia { get; set; }
         public DateTime Dta_Cadastro { get; set; }
         public List<DateTime>? Dta_Conclusoes { get; set; }
+        public Usuario Usuario { get; set; } = new Usuario();
 
         public Habito()
         {

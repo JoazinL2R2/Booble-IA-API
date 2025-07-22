@@ -25,6 +25,7 @@ namespace Booble_IA_API._1___Controllers
 
             var habito = new Habito
             {
+                Idf_Usuario = dto.Idf_Usuario,
                 Des_Habito = dto.Des_Habito,
                 Des_Titulo = dto.Des_Titulo,
                 Flg_Timer = dto.Flg_Timer,

@@ -13,5 +13,6 @@ namespace Booble_IA_API._2___Services.DTO
         public string Des_Cor { get; set; }
         public string Des_Descricao { get; set; }
         public FrequenciaEnum Idf_Frequencia { get; set; }
+        public int Idf_Usuario { get; set; }
     }
 }
