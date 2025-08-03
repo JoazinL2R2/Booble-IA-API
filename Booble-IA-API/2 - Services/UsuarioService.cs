@@ -58,6 +58,11 @@ namespace Booble_IA_API._2___Services
             throw new Exception("Erro ao cadastrar usuário.");
         }
 
+        public async Task<UsuarioDTO> Get(int idUsuario)
+        {
+            return await _usuarioRepository.GetById(idUsuario);
+        }
+
         public async Task<string> Login(UsuarioDTO loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Des_Email))
@@ -86,5 +91,7 @@ namespace Booble_IA_API._2___Services
 
             throw new Exception("Não foi possível realizar o login");
         }
+
+        
     }
 }

@@ -45,6 +45,36 @@ namespace Booble_IA_API._3___Repository
             }
         }
 
+        public async Task<UsuarioDTO> GetById(int idUsuario)
+        {
+            try
+            {
+                var usuario = await _boobleContext.Usuarios.FirstOrDefaultAsync(x => x.Idf_Usuario == idUsuario);
+                if (usuario == null)
+                {
+                    throw new Exception($"Erro ao buscar dados do usuário com Id:{idUsuario}");
+                }
+                UsuarioDTO usuarioDTO = new UsuarioDTO
+                {
+                    Idf_Usuario = usuario.Idf_Usuario,
+                    Des_Email = usuario.Des_Email,
+                    Des_Nme = usuario.Des_Nme,
+                    Num_Telefone = usuario.Num_Telefone,
+                    Flg_Sexo = usuario.Flg_Sexo,
+                    Dta_Nascimento = usuario.Dta_Nascimento,
+                    Dta_Cadastro = usuario.Dta_Cadastro,
+                    Dta_Alteracao = usuario.Dta_Alteracao
+                };
+                return usuarioDTO;
+            }
+
+            catch(Exception ex)
+            {
+                throw new Exception($"Erro ao buscar usuário: {ex.Message}");
+            }
+
+        }
+
         public async Task<Usuario> Login(UsuarioDTO loginRequest)
         {
             try

@@ -8,5 +8,6 @@ namespace Booble_IA_API._3___Repository.Interfaces
     {
         Task<bool> Cadastro(UsuarioDTO usuario);
         Task<Usuario> Login(UsuarioDTO loginRequest);
+        Task<UsuarioDTO> GetById(int idUsuario);
     }
 }

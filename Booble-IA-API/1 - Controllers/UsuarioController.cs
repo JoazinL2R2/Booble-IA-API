@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API.DTO;
 using Microsoft.AspNetCore.Http;
@@ -61,6 +62,30 @@ namespace Booble_IA_API.Controllers
             {
                 return StatusCode(500, new { message = $"Erro interno ao realizar login: {ex.Message}" });
             }
+
+            
+            
+            //criar regra de negocio para verificar se o usuário está ativo ou não, etc.
+            //criar interacao com o banco de dados (repository)
+            //retornar o usuário logado com os dados do perfil, como nome, email, telefone, etc.
+
+
+        }
+        //criar endpoint para retornar dados do usuario ( perfil) GET: usuarios/PerfilUsuario
+        [HttpGet]
+        [Route("PerfilUsuario")]
+        public async Task<IActionResult> PerfilUsuario(int idUsuario) 
+        {
+            try
+            {
+                return Ok(await _usuarioService.Get(idUsuario));
+            }
+            catch  (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro interno ao buscar perfil do usuário: {ex.Message}" });
+            }
+
+
         }
     }
 }
