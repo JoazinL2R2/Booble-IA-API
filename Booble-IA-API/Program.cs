@@ -8,6 +8,7 @@ using Booble_IA_API._3___Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,13 +16,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Add infrastructure services (includes Identity Server and JWT authentication)
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Add global authorization policy - require authentication by default
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure Swagger to support OAuth2
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Booble IA API", Version = "v1" });
+    c.SwaggerDoc("v1", new() { 
+        Title = "Booble IA API", 
+        Version = "v1",
+        Description = "API com autenticação OAuth2 e JWT. Todos os endpoints requerem autenticação, exceto login, registro e health check básico."
+    });
     
     // Add OAuth2 security definition
     c.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -35,7 +48,10 @@ builder.Services.AddSwaggerGen(c =>
                 TokenUrl = new Uri("https://localhost:7000/connect/token"),
                 Scopes = new Dictionary<string, string>
                 {
-                    { "booble_api", "Booble API" }
+                    { "booble_api", "Booble API Access" },
+                    { "openid", "OpenID Connect" },
+                    { "profile", "User Profile" },
+                    { "email", "Email Address" }
                 }
             },
             Password = new Microsoft.OpenApi.Models.OpenApiOAuthFlow
@@ -43,7 +59,7 @@ builder.Services.AddSwaggerGen(c =>
                 TokenUrl = new Uri("https://localhost:7000/connect/token"),
                 Scopes = new Dictionary<string, string>
                 {
-                    { "booble_api", "Booble API" }
+                    { "booble_api", "Booble API Access" }
                 }
             }
         }
@@ -52,13 +68,15 @@ builder.Services.AddSwaggerGen(c =>
     // Add Bearer JWT security definition for backward compatibility
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme",
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer"
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
     });
 
+    // Global security requirement
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -67,10 +85,10 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new Microsoft.OpenApi.Models.OpenApiReference
                 {
                     Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "oauth2"
+                    Id = "Bearer"
                 }
             },
-            new[] { "booble_api" }
+            Array.Empty<string>()
         }
     });
 });
@@ -84,7 +102,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000",
                 "https://localhost:3000",
                 "exp://localhost:19000",
-                "exp://192.168.1.100:19000"
+                "exp://192.168.1.100:19000",
+                "https://localhost:7000" // Identity Server
             )
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -104,6 +123,8 @@ if (app.Environment.IsDevelopment())
         c.OAuthClientId("booble_web");
         c.OAuthAppName("Booble API");
         c.OAuthUsePkce();
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+        c.DefaultModelsExpandDepth(-1); // Hide schemas section
     });
 }
 

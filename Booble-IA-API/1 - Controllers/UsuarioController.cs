@@ -22,6 +22,7 @@ namespace Booble_IA_API.Controllers
 
         [HttpPost]
         [Route("Cadastro")]
+        [AllowAnonymous] // Public endpoint for registration
         public async Task<IActionResult> Cadastro([FromBody] UsuarioDTO cadastroRequest)
         {
             try
@@ -45,6 +46,7 @@ namespace Booble_IA_API.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [AllowAnonymous] // Public endpoint for authentication
         public async Task<IActionResult> Login([FromBody] UsuarioDTO loginRequest)
         {
             try
@@ -85,7 +87,7 @@ namespace Booble_IA_API.Controllers
 
         [HttpGet]
         [Route("PerfilUsuario")]
-        [Authorize] // Now requires authentication
+        [Authorize] // Protected endpoint
         public async Task<IActionResult> PerfilUsuario()
         {
             try
@@ -117,7 +119,7 @@ namespace Booble_IA_API.Controllers
         // Alternative endpoint that accepts user ID for backward compatibility
         [HttpGet]
         [Route("PerfilUsuario/{idUsuario}")]
-        [Authorize]
+        [Authorize] // Protected endpoint
         public async Task<IActionResult> PerfilUsuarioPorId(int idUsuario)
         {
             try
@@ -143,6 +145,41 @@ namespace Booble_IA_API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Erro interno ao buscar perfil do usuário: {ex.Message}" });
+            }
+        }
+
+        [HttpPut]
+        [Route("AtualizarPerfil")]
+        [Authorize] // Protected endpoint for profile updates
+        public async Task<IActionResult> AtualizarPerfil([FromBody] UsuarioDTO updateRequest)
+        {
+            try
+            {
+                // Get user ID from JWT token claims
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                                User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(new { message = "Token inválido ou usuário não encontrado." });
+                }
+
+                // Ensure user can only update their own profile
+                if (updateRequest.Idf_Usuario != userId)
+                {
+                    return Forbid("Você só pode atualizar seu próprio perfil.");
+                }
+
+                // Here you would implement profile update logic
+                // For now, return a placeholder
+                return Ok(new { 
+                    message = "Endpoint para atualização de perfil - implementar service method",
+                    userId = userId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro interno ao atualizar perfil: {ex.Message}" });
             }
         }
     }

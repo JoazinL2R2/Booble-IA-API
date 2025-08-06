@@ -27,10 +27,16 @@ namespace Booble_IA_API._1___Controllers
         }
 
         [HttpPost("token")]
+        [AllowAnonymous] // Public endpoint for token generation
         public async Task<IActionResult> Token([FromForm] TokenRequest request)
         {
             try
             {
+                if (string.IsNullOrEmpty(request.grant_type))
+                {
+                    return BadRequest(new { error = "invalid_request", error_description = "grant_type is required" });
+                }
+
                 if (request.grant_type == "password")
                 {
                     return await HandlePasswordGrant(request);
@@ -40,17 +46,22 @@ namespace Booble_IA_API._1___Controllers
                     return await HandleRefreshTokenGrant(request);
                 }
 
-                return BadRequest(new { error = "unsupported_grant_type" });
+                return BadRequest(new { error = "unsupported_grant_type", error_description = $"Grant type '{request.grant_type}' is not supported" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in OAuth token endpoint");
-                return StatusCode(500, new { error = "server_error", error_description = ex.Message });
+                return StatusCode(500, new { error = "server_error", error_description = "An internal server error occurred" });
             }
         }
 
         private async Task<IActionResult> HandlePasswordGrant(TokenRequest request)
         {
+            if (string.IsNullOrEmpty(request.username) || string.IsNullOrEmpty(request.password))
+            {
+                return BadRequest(new { error = "invalid_request", error_description = "Username and password are required" });
+            }
+
             var loginDto = new UsuarioDTO
             {
                 Des_Email = request.username,
@@ -64,13 +75,13 @@ namespace Booble_IA_API._1___Controllers
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid username or password" });
             }
 
-            // Create additional OAuth2 response
+            // Create OAuth2 compliant response
             var tokenResponse = new
             {
                 access_token = token,
                 token_type = "Bearer",
                 expires_in = 3600,
-                refresh_token = Guid.NewGuid().ToString(), // In production, implement proper refresh token logic
+                refresh_token = Guid.NewGuid().ToString(), // In production, implement proper refresh token storage and validation
                 scope = request.scope ?? "booble_api"
             };
 
@@ -79,45 +90,49 @@ namespace Booble_IA_API._1___Controllers
 
         private async Task<IActionResult> HandleRefreshTokenGrant(TokenRequest request)
         {
-            // In a production environment, validate the refresh token against your database
-            // For now, this is a simplified implementation
-            
             if (string.IsNullOrEmpty(request.refresh_token))
             {
                 return BadRequest(new { error = "invalid_request", error_description = "refresh_token is required" });
             }
 
-            // Here you would validate the refresh token and get user info
-            // For now, returning an error - implement proper refresh token logic
-            return BadRequest(new { error = "invalid_grant", error_description = "Invalid refresh token" });
+            // In production, implement proper refresh token validation:
+            // 1. Check if refresh token exists and is valid
+            // 2. Check if refresh token is not expired
+            // 3. Get the associated user
+            // 4. Generate new access token
+            // 5. Optionally rotate the refresh token
+            
+            return BadRequest(new { error = "invalid_grant", error_description = "Refresh token functionality not yet implemented" });
         }
 
         [HttpGet("userinfo")]
-        [Authorize]
+        [Authorize] // Protected endpoint - requires valid access token
         public async Task<IActionResult> UserInfo()
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                                User.FindFirst("sub")?.Value;
                 
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { error = "invalid_token", error_description = "Invalid or missing user identifier in token" });
                 }
 
                 var user = await _usuarioService.Get(userId);
                 
                 if (user == null)
                 {
-                    return NotFound(new { error = "user_not_found" });
+                    return NotFound(new { error = "user_not_found", error_description = "User not found" });
                 }
 
+                // Return OpenID Connect standard userinfo response
                 var userInfo = new
                 {
                     sub = user.Idf_Usuario.ToString(),
                     name = user.Des_Nme,
                     email = user.Des_Email,
-                    phone = user.Num_Telefone,
+                    phone_number = user.Num_Telefone,
                     gender = user.Flg_Sexo?.ToString() ?? "",
                     birthdate = user.Dta_Nascimento.ToString("yyyy-MM-dd"),
                     created_at = user.Dta_Cadastro?.ToString("yyyy-MM-ddTHH:mm:ssZ"),
@@ -128,18 +143,66 @@ namespace Booble_IA_API._1___Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user info");
-                return StatusCode(500, new { error = "server_error" });
+                _logger.LogError(ex, "Error retrieving user info for user");
+                return StatusCode(500, new { error = "server_error", error_description = "An error occurred while retrieving user information" });
             }
         }
 
         [HttpPost("revoke")]
-        [Authorize]
+        [Authorize] // Protected endpoint - requires valid access token
         public IActionResult RevokeToken([FromForm] RevokeTokenRequest request)
         {
-            // In production, implement proper token revocation
-            // For now, just return success
-            return Ok();
+            try
+            {
+                if (string.IsNullOrEmpty(request.token))
+                {
+                    return BadRequest(new { error = "invalid_request", error_description = "token parameter is required" });
+                }
+
+                // In production, implement proper token revocation:
+                // 1. Validate the token
+                // 2. Mark it as revoked in your token store/database
+                // 3. If it's a refresh token, also revoke associated access tokens
+                
+                _logger.LogInformation("Token revocation requested - implement proper revocation logic");
+                
+                return Ok(new { message = "Token revocation processed" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in token revocation");
+                return StatusCode(500, new { error = "server_error", error_description = "An error occurred during token revocation" });
+            }
+        }
+
+        [HttpGet("introspect")]
+        [Authorize] // Protected endpoint for token introspection
+        public IActionResult IntrospectToken([FromQuery] string token)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    return BadRequest(new { error = "invalid_request", error_description = "token parameter is required" });
+                }
+
+                // In production, implement proper token introspection:
+                // 1. Validate the token
+                // 2. Return token metadata if valid
+                
+                return Ok(new { 
+                    active = true,  // Placeholder - implement proper validation
+                    token_type = "Bearer",
+                    scope = "booble_api",
+                    exp = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(),
+                    iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in token introspection");
+                return StatusCode(500, new { error = "server_error" });
+            }
         }
     }
 

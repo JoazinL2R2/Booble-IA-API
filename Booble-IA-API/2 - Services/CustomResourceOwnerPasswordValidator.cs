@@ -44,7 +44,7 @@ namespace Booble_IA_API._2___Services
                     );
                 }
                 else
-                {5
+                {
                     context.Result = new GrantValidationResult(
                         TokenRequestErrors.InvalidGrant,
                         "Invalid credentials"
