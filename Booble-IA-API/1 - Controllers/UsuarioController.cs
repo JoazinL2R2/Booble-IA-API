@@ -4,6 +4,8 @@ using Booble_IA_API._2___Services.Interfaces;
 using Booble_IA_API.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Booble_IA_API.Controllers
 {
@@ -52,7 +54,24 @@ namespace Booble_IA_API.Controllers
                 if (string.IsNullOrEmpty(token))
                     return BadRequest(new { message = "Email ou senha inválidos." });
 
-                return Ok(new { Authtoken = token });
+                // Return both legacy token and OAuth2 information
+                var response = new
+                {
+                    Authtoken = token,
+                    access_token = token,
+                    token_type = "Bearer",
+                    expires_in = 3600,
+                    // OAuth2 endpoints for clients that want to use them
+                    oauth2_endpoints = new
+                    {
+                        authorization_endpoint = $"{Request.Scheme}://{Request.Host}/connect/authorize",
+                        token_endpoint = $"{Request.Scheme}://{Request.Host}/connect/token",
+                        userinfo_endpoint = $"{Request.Scheme}://{Request.Host}/api/oauth/userinfo",
+                        revocation_endpoint = $"{Request.Scheme}://{Request.Host}/connect/revocation"
+                    }
+                };
+
+                return Ok(response);
             }
             catch (ArgumentNullException ex)
             {
@@ -62,30 +81,69 @@ namespace Booble_IA_API.Controllers
             {
                 return StatusCode(500, new { message = $"Erro interno ao realizar login: {ex.Message}" });
             }
-
-            
-            
-            //criar regra de negocio para verificar se o usuário está ativo ou não, etc.
-            //criar interacao com o banco de dados (repository)
-            //retornar o usuário logado com os dados do perfil, como nome, email, telefone, etc.
-
-
         }
-        //criar endpoint para retornar dados do usuario ( perfil) GET: usuarios/PerfilUsuario
+
         [HttpGet]
         [Route("PerfilUsuario")]
-        public async Task<IActionResult> PerfilUsuario(int idUsuario) 
+        [Authorize] // Now requires authentication
+        public async Task<IActionResult> PerfilUsuario()
         {
             try
             {
-                return Ok(await _usuarioService.Get(idUsuario));
+                // Get user ID from JWT token claims
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                                User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                {
+                    return Unauthorized(new { message = "Token inválido ou usuário não encontrado." });
+                }
+
+                var userProfile = await _usuarioService.Get(userId);
+                
+                if (userProfile == null)
+                {
+                    return NotFound(new { message = "Perfil do usuário não encontrado." });
+                }
+
+                return Ok(userProfile);
             }
-            catch  (Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Erro interno ao buscar perfil do usuário: {ex.Message}" });
             }
+        }
 
+        // Alternative endpoint that accepts user ID for backward compatibility
+        [HttpGet]
+        [Route("PerfilUsuario/{idUsuario}")]
+        [Authorize]
+        public async Task<IActionResult> PerfilUsuarioPorId(int idUsuario)
+        {
+            try
+            {
+                // Verify that the requesting user can access this profile
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? 
+                                User.FindFirst("sub")?.Value;
 
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var requestingUserId))
+                {
+                    return Unauthorized(new { message = "Token inválido." });
+                }
+
+                // For now, users can only access their own profile
+                // You can modify this logic to allow friends to see each other's profiles
+                if (requestingUserId != idUsuario)
+                {
+                    return Forbid("Você só pode acessar seu próprio perfil.");
+                }
+
+                return Ok(await _usuarioService.Get(idUsuario));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Erro interno ao buscar perfil do usuário: {ex.Message}" });
+            }
         }
     }
 }
