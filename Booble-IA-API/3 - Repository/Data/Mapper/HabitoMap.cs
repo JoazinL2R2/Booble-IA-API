@@ -75,6 +75,38 @@ namespace Booble_IA_API._3___Repository.Data.Mapper
                     (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
                     c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c == null ? null : c.ToList()));
+
+            // Relationships
+            builder.Property(h => h.Idf_Usuario)
+                .HasColumnName("Idf_Usuario")
+                .IsRequired();
+
+            builder.HasOne(h => h.Usuario)
+                .WithMany()
+                .HasForeignKey(h => h.Idf_Usuario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(h => h.Cor)
+                .WithMany()
+                .HasForeignKey(h => h.Des_Cor)
+                .HasPrincipalKey(c => c.Des_Cor)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(h => h.Frequencia)
+                .WithMany()
+                .HasForeignKey(h => h.Idf_Frequencia)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(h => h.FrequenciaPersonalizada)
+                .WithMany()
+                .HasForeignKey(h => h.Idf_Frequencia)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(h => h.HabitoIcone)
+                .WithMany()
+                .HasForeignKey(h => h.Des_Icone)
+                .HasPrincipalKey(hi => hi.Des_Habito_Icone)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

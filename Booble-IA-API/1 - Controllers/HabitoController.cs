@@ -34,7 +34,7 @@ namespace Booble_IA_API._1___Controllers
                 Num_Xp = dto.Num_Xp,
                 Des_Cor = dto.Des_Cor,
                 Des_Descricao = dto.Des_Descricao,
-                Idf_Frequencia = dto.Idf_Frequencia,
+                Idf_Frequencia = (int)dto.Idf_Frequencia,
                 Dta_Cadastro = DateTime.UtcNow,
                 Flg_Concluido = false
             };
