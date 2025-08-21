@@ -18,8 +18,10 @@ namespace Booble_IA_API._3___Repository.Entities
         public DateTime Dta_Cadastro { get; set; }
         public List<DateTime>? Dta_Conclusoes { get; set; }
         public int Idf_Usuario { get; set; }
+        
+        // Navigation properties
         public Usuario Usuario { get; set; }
-        public Cor Cor { get; set; }
+        public Cor? Cor { get; set; }
         public Frequencia Frequencia { get; set; }
         public FrequenciaPersonalizada? FrequenciaPersonalizada { get; set; }
         public HabitoIcone? HabitoIcone { get; set; }
@@ -27,7 +29,6 @@ namespace Booble_IA_API._3___Repository.Entities
         public Habito()
         {
             Usuario = new Usuario();
-            Cor = new Cor();
             Frequencia = new Frequencia();
         }
     }

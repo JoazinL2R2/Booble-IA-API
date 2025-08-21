@@ -1,10 +1,8 @@
 ﻿using Booble_IA_API._3___Repository.Data;
 using Booble_IA_API._3___Repository.Entities;
+using Booble_IA_API._3___Repository.Enums;
 using Booble_IA_API._3___Repository.Interfaces;
-using Booble_IA_API.DTO;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
 
 namespace Booble_IA_API._3___Repository
 {
@@ -21,15 +19,25 @@ namespace Booble_IA_API._3___Repository
         {
             try
             {
-                habito.Dta_Cadastro = DateTime.Now;
-                habito.Flg_Concluido = false;
+                if (habito.Dta_Conclusoes == null)
+                    habito.Dta_Conclusoes = new List<DateTime>();
+
+                habito.Frequencia.Des_Frequencia = habito.Frequencia.Idf_Frequencia switch
+                {
+                    1 => "Diário",
+                    2 => "Semanal",
+                    3 => "Mensal",
+                    4 => "Personalizada",
+                    _ => "Indefinida"
+                };
+
                 await _boobleContext.Habitos.AddAsync(habito);
                 await _boobleContext.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao cadastrar hábito: {ex.Message}.");
+                throw new Exception($"Erro ao cadastrar hábito: {ex.Message}", ex);
             }
         }
 
@@ -40,17 +48,58 @@ namespace Booble_IA_API._3___Repository
                 var habito = await _boobleContext.Habitos.FirstOrDefaultAsync(h => h.Idf_Habito == idfHabito);
 
                 if (habito == null)
-                    throw new Exception("Hábito não encontrado ou inexistente");
+                    return false;
 
                 habito.Flg_Concluido = true;
-                habito.Dta_Conclusoes.Add(DateTime.Now);
+                
+                // Inicializar lista se for nula
+                if (habito.Dta_Conclusoes == null)
+                    habito.Dta_Conclusoes = new List<DateTime>();
+                
+                habito.Dta_Conclusoes.Add(DateTime.UtcNow);
+                
                 _boobleContext.Habitos.Update(habito);
                 await _boobleContext.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao finalizar hábito: {ex.Message}.");
+                throw new Exception($"Erro ao finalizar hábito: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<Habito>> GetHabitosUsuario(int idUsuario)
+        {
+            try
+            {
+                return await _boobleContext.Habitos
+                    .Include(h => h.Frequencia)
+                    .Include(h => h.HabitoIcone)
+                    .Include(h => h.Cor)
+                    .Include(h => h.FrequenciaPersonalizada)
+                    .Where(h => h.Idf_Usuario == idUsuario)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar hábitos do usuário: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<Habito?> GetHabitoById(int idfHabito)
+        {
+            try
+            {
+                return await _boobleContext.Habitos
+                    .Include(h => h.Frequencia)
+                    .Include(h => h.HabitoIcone)
+                    .Include(h => h.Cor)
+                    .Include(h => h.FrequenciaPersonalizada)
+                    .FirstOrDefaultAsync(h => h.Idf_Habito == idfHabito);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao buscar hábito: {ex.Message}", ex);
             }
         }
     }

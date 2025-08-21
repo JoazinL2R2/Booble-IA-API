@@ -7,7 +7,7 @@ namespace Booble_IA_API._2___Services.Interfaces
     public interface IUsuarioService
     {
         Task<object> Cadastro(UsuarioDTO cadastroRequest);
-        Task<string> Login(UsuarioDTO loginRequest);
+        Task<UsuarioDTO> Login(UsuarioDTO loginRequest);
 
         Task<UsuarioDTO> Get(int idUsuario);
     }

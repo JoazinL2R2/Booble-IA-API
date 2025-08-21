@@ -26,5 +26,6 @@ namespace Booble_IA_API.DTO
         public DateTime Dta_Nascimento { get; set; }
         public DateTime? Dta_Cadastro { get; set; }
         public DateTime? Dta_Alteracao { get; set; }
+        public string? token { get; set; }
     }
 }

@@ -63,7 +63,7 @@ namespace Booble_IA_API._2___Services
             return await _usuarioRepository.GetById(idUsuario);
         }
 
-        public async Task<string> Login(UsuarioDTO loginRequest)
+        public async Task<UsuarioDTO> Login(UsuarioDTO loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Des_Email))
                 throw new ArgumentNullException(nameof(loginRequest.Des_Email), "O campo Email não pode estar vázio.");
@@ -86,7 +86,12 @@ namespace Booble_IA_API._2___Services
 
             if (usuario != null)
             {
-                return _jwtTokenService.GenerateToken(usuarioDTO);
+                var token = _jwtTokenService.GenerateToken(usuarioDTO);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    usuarioDTO.token = token;
+                    return usuarioDTO;
+                }
             }
 
             throw new Exception("Não foi possível realizar o login");

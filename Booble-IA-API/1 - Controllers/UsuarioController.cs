@@ -47,12 +47,12 @@ namespace Booble_IA_API.Controllers
         {
             try
             {
-                var token = await _usuarioService.Login(loginRequest);
+                var login = await _usuarioService.Login(loginRequest);
 
-                if (string.IsNullOrEmpty(token))
+                if (string.IsNullOrEmpty(login.token))
                     return BadRequest(new { message = "Email ou senha inválidos." });
 
-                return Ok(new { Authtoken = token });
+                return Ok(new { Authtoken = login.token, IdUsuario = login.Idf_Usuario });
             }
             catch (ArgumentNullException ex)
             {
@@ -61,17 +61,10 @@ namespace Booble_IA_API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Erro interno ao realizar login: {ex.Message}" });
-            }
-
-            
-            
-            //criar regra de negocio para verificar se o usuário está ativo ou não, etc.
-            //criar interacao com o banco de dados (repository)
-            //retornar o usuário logado com os dados do perfil, como nome, email, telefone, etc.
-
-
+            }                     
         }
-        //criar endpoint para retornar dados do usuario ( perfil) GET: usuarios/PerfilUsuario
+
+
         [HttpGet]
         [Route("PerfilUsuario")]
         public async Task<IActionResult> PerfilUsuario(int idUsuario) 
